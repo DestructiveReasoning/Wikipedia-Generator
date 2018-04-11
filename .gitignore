@@ -1,5 +1,15 @@
+# virtualenv
+.env
+
 # macos
 .DS_store
 
 # vim
 *.swp
+
+# tmp files
+.data.tmp.zip
+.glove.tmp.zip
+
+# downloaded resources
+resources/glove.6b
