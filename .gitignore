@@ -8,8 +8,8 @@
 *.swp
 
 # tmp files
-.data.tmp.zip
+.data.tmp.tar.gz
 .glove.tmp.zip
 
 # downloaded resources
-resources/glove.6b
+resources/glove

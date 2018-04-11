@@ -6,7 +6,7 @@ GLOVEURL='https://nlp.stanford.edu/data/glove.6B.zip'
 
 if [ ! -d .env ]; then
     echo "Creating virtualenv and downloading dependencies"
-    virtualenv .env
+    virtualenv .env -p python3
     source .env/bin/activate
     pip install -r requirements.txt
 else
@@ -14,19 +14,23 @@ else
 fi
 
 if [ ! -d data/processed ]; then
+    DATAFNAME='.data.tmp.tar.gz'
     echo "Downloading processed dataset"
-    curl -S $DATAURL > .data.tmp.zip
-    unzip .data.tmp.zip -d data
-    rm .data.tmp.zip
+    curl -S $DATAURL > $DATAFNAME 
+    tar -xf $DATAFNAME -C data
+    rm $DATAFNAME
 else
     echo "Dataset already downloaded"
 fi
 
-if [ ! -d resources/glove.6B ]; then
+GLOVEDIR='resources/glove'
+if [ ! -d $GLOVEDIR ]; then
+    GLOVEFNAME='.glove.tmp.zip'
     echo "Downloading GloVe word embeddings"
-    curl -S $GLOVEURL > .glove.tmp.zip
-    unzip .glove.tmp.zip -d resources
-    rm .glove.tmp.zip
+    curl -S $GLOVEURL > $GLOVEFNAME
+    mkdir $GLOVEDIR
+    unzip $GLOVEFNAME -d $GLOVEDIR
+    rm $GLOVEFNAME 
 else
     echo "GloVe word embeddings already downloaded"
 fi
