@@ -48,11 +48,11 @@ VOCAB_SIZE = 200000
 def tokenize_stories(stories_dir, tokenized_stories_dir):
     """Maps a whole directory of .story files to a tokenized version using
     Stanford CoreNLP Tokenizer"""
-    print "Preparing to tokenize %s to %s..." % (
-        stories_dir, tokenized_stories_dir)
+    print("Preparing to tokenize %s to %s..." % (
+        stories_dir, tokenized_stories_dir))
     stories = os.listdir(stories_dir)
     # make IO list file
-    print "Making list of files to tokenize..."
+    print("Making list of files to tokenize...")
     with open("mapping.txt", "w") as f:
         for s in stories:
             f.write(
