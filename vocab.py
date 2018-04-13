@@ -13,19 +13,22 @@ RIGHTBRACE = '-rrb-'
 
 
 class Vocab:
-    UNK = '<unk>'
-    UNK_i = 0
+    UNK = '<unk>'  # unknown token
 
     def __init__(self, vocab):
         self.vocab = vocab
+        self.vocab[Vocab.UNK] = len(self.vocab)
 
     def word_to_index(self, word):
         if word in self.vocab:
-            return self.vocab[word] + 1
-        return Vocab.UNK_i
+            return self.vocab[word]
+        return self.vocab[Vocab.UNK]
+
+    def exists(self, word):
+        return word in self.vocab
 
     def size(self):
-        return len(self.vocab) + 1  # plus one for <unk>
+        return len(self.vocab)
 
 
 def loadvocab(f, limit=None):
@@ -68,7 +71,7 @@ def loadembeddings(f, vocab):
     for l in f:
         vec = l.split(' ')
         w, vec = vec[0], vec[1:]
-        if vocab.word_to_index(w) == Vocab.UNK_i:
+        if not vocab.exists(w):
             continue
         i = vocab.word_to_index(w)
         wordvectors[i] = np.array(vec, dtype=float)
