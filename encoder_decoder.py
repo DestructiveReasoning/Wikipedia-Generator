@@ -15,7 +15,8 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from torch import optim
 
-from vocab import Vocab
+from os import path
+from vocab import Vocab, loadvocab
 
 
 MAX_LENGTH = 100
@@ -23,6 +24,14 @@ MAX_LENGTH = 100
 use_cuda = torch.cuda.is_available()
 teacher_forcing_ratio = 0.5
 
+DATADIR = 'data/processed'
+VOCABFNAME = path.join(DATADIR, 'vocab')
+VOCABSIZE = 150000
+with open(VOCABFNAME, 'r') as f:
+    vocab = loadvocab(f, VOCABSIZE)
+
+def make_pairs(articles, abstracts):
+    return list(zip(articles, abstracts))
 
 def variableFromSentence(vocab, sentence):
     indices = vocab.words_to_indices(sentence)
@@ -103,7 +112,8 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
         encoder_outputs[ei] = encoder_output[0][0]
 
     # TODO: add starting token
-    decoder_input = Variable(torch.LongTensor([[Vocab.UNK]]))
+    SOS_token = vocab.word_to_index(Vocab.SOS)
+    decoder_input = Variable(torch.LongTensor([[SOS_token]]))
     decoder_input = decoder_input.cuda() if use_cuda else decoder_input
 
     decoder_hidden = encoder_hidden
@@ -115,16 +125,16 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
     if use_teacher_forcing:
         # Teacher forcing: Feed the target as the next input
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+            decoder_output, decoder_hidden = decoder(
+                decoder_input, decoder_hidden)
             loss += criterion(decoder_output, target_variable[di])
             decoder_input = target_variable[di]  # Teacher forcing
 
     else:
         # Without teacher forcing: use its own predictions as the next input
         for di in range(target_length):
-            decoder_output, decoder_hidden, decoder_attention = decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+            decoder_output, decoder_hidden = decoder(
+                decoder_input, decoder_hidden)
             topv, topi = decoder_output.data.topk(1)
             ni = topi[0][0]
 
@@ -168,7 +178,7 @@ def showPlot(points):
 
 # TODO: build training pairs
 def trainIters(encoder, decoder, n_iters, training_pairs, print_every=1000,
-               plot_every=100, learning_rate=0.01):
+               plot_every=100, learning_rate=0.01, max_length=MAX_LENGTH):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -185,7 +195,7 @@ def trainIters(encoder, decoder, n_iters, training_pairs, print_every=1000,
         target_variable = training_pair[1]
 
         loss = train(input_variable, target_variable, encoder,
-                     decoder, encoder_optimizer, decoder_optimizer, criterion)
+                     decoder, encoder_optimizer, decoder_optimizer, criterion, max_length=max_length)
         print_loss_total += loss
         plot_loss_total += loss
 

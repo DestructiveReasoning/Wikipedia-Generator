@@ -8,3 +8,4 @@ pytz==2018.4
 PyYAML==3.12
 six==1.11.0
 torch==0.3.1
+rouge==0.2.1
