@@ -50,7 +50,7 @@ class EncoderRNN(nn.Module):
         self.embedding = embedding
         if embedding is None:
             self.embedding = nn.Embedding(input_size, hidden_size)
-        self.lstm = nn.LSTM(hidden_size, hidden_size)
+        self.lstm = nn.LSTM(hidden_size, hidden_size, bidirectional=True)
 
     def forward(self, input, hidden):
         embedded = self.embedding(input).view(1, 1, -1)
@@ -59,7 +59,7 @@ class EncoderRNN(nn.Module):
         return output, hidden
 
     def initHidden(self):
-        result = (Variable(torch.zeros(1, 1, self.hidden_size)), Variable(torch.zeros(1, 1, self.hidden_size)))
+        result = (Variable(torch.zeros(2, 1, self.hidden_size)), Variable(torch.zeros(2, 1, self.hidden_size)))
         if use_cuda:
             return result.cuda()
         else:
@@ -84,6 +84,7 @@ class DecoderRNN(nn.Module):
         return output, hidden
 
     def initHidden(self):
+#        result = (Variable(torch.zeros(1, 1, self.hidden_size)),Variable(torch.zeros(1, 1, self.hidden_size)))
         result = Variable(torch.zeros(1, 1, self.hidden_size))
         if use_cuda:
             return result.cuda()
@@ -100,8 +101,8 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
 
     input_length = input_variable.size()[0]
     target_length = target_variable.size()[0]
-
     encoder_outputs = Variable(torch.zeros(max_length, encoder.hidden_size))
+    encoder_outputs = Variable(torch.zeros(max_length, 2*encoder.hidden_size))
     encoder_outputs = encoder_outputs.cuda() if use_cuda else encoder_outputs
 
     loss = 0
@@ -116,7 +117,7 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
     decoder_input = Variable(torch.LongTensor([[SOS_token]]))
     decoder_input = decoder_input.cuda() if use_cuda else decoder_input
 
-    decoder_hidden = encoder_hidden
+    decoder_hidden = torch.cat([encoder_hidden[0], encoder_hidden[1]], dim=2).view(1,1,200)
 
     use_teacher_forcing = False
     if random.random() < teacher_forcing_ratio:

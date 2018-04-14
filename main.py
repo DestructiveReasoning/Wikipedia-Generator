@@ -31,7 +31,7 @@ if __name__ == '__main__':
     articles = []
     abstracts = []
     with open(TESTSET, 'r') as f:
-        for i in range(5):
+        for i in range(10):
             articles.append(f.readline())
             abstracts.append(f.readline())
 
@@ -41,8 +41,9 @@ if __name__ == '__main__':
 
 #     TODO: change dimesion of hidden layer
     encoder = EncoderRNN(vocab.size(), HIDDEN_SIZE, emb)
-    decoder = DecoderRNN(HIDDEN_SIZE, vocab.size())
+    decoder = DecoderRNN(2*HIDDEN_SIZE, vocab.size())
 
+    print("Starting to train...")
     trainIters(encoder, decoder, 10, pairs, print_every=1, plot_every=1000, max_length=MAX_LENGTH)
 #
 #    article_input = variableFromSentence(vocab, article)
