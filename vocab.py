@@ -13,11 +13,15 @@ RIGHTBRACE = '-rrb-'
 
 
 class Vocab:
-    UNK = '<unk>'  # unknown token
+    UNK = '<UNK>'  # unknown token
+    SOS = '<SOS>'  # start of sequence token
+    EOS = '<EOS>'  # end of sequence token
 
     def __init__(self, vocab):
         self.vocab = vocab
         self.vocab[Vocab.UNK] = len(self.vocab)
+        self.vocab[Vocab.SOS] = len(self.vocab)
+        self.vocab[Vocab.EOS] = len(self.vocab)
 
     def word_to_index(self, word):
         if word in self.vocab:
@@ -29,6 +33,9 @@ class Vocab:
 
     def size(self):
         return len(self.vocab)
+
+    def words_to_indices(self, words):
+        return [self.word_to_index(w) for w in words]
 
 
 def loadvocab(f, limit=None):
@@ -78,7 +85,7 @@ def loadembeddings(f, vocab):
 
     # initialize words without embeddings to random vectors
     M = vocab.size()
-    N = len(wordvectors[1])
+    N = len(wordvectors[0])
     wordvectors = list(map(lambda v: np.random.rand(N) if v is None else v,
                            wordvectors))
 

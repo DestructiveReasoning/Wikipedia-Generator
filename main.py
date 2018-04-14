@@ -1,6 +1,10 @@
 from os import path
 
-from vocab import loadvocab, loadembeddings
+import torch
+from torch.autograd import Variable
+
+from vocab import Vocab, loadvocab, loadembeddings
+from encoder_decoder import EncoderRNN, DecoderRNN, variableFromSentence
 
 
 DATADIR = 'data/processed'
@@ -11,10 +15,10 @@ VOCABSIZE = 150000
 
 GLOVEFNAME = 'resources/glove/glove.6B.50d.txt'
 
+HIDDEN_SIZE = 50
+MAX_LENGTH = 10000
 
-def indices_from_text(text, vocab):
-    text = text.split(' ')
-    return [vocab.word_to_index(w) for w in text]
+use_cuda = torch.cuda.is_available()
 
 
 if __name__ == '__main__':
@@ -25,6 +29,27 @@ if __name__ == '__main__':
         emb = loadembeddings(f, vocab)
 
     with open(TESTSET, 'r') as f:
-        _ = f.readline()
+        article = f.readline()
         abstract = f.readline()
-        print(indices_from_text(abstract, vocab))
+
+    # TODO: change dimesion of hidden layer
+    encoder = EncoderRNN(vocab.size(), HIDDEN_SIZE, emb)
+    decoder = DecoderRNN(HIDDEN_SIZE, vocab.size())
+
+    article_input = variableFromSentence(vocab, article)
+    abstract_input = variableFromSentence(vocab, abstract)
+
+    encoder_hidden = encoder.initHidden()
+    encoder_outputs = Variable(torch.zeros(MAX_LENGTH, encoder.hidden_size))
+    for i in range(article_input.size()[0]):
+        encoder_output, encoder_hidden = encoder(article_input[i], encoder_hidden)
+        encoder_outputs[i] = encoder_output[0][0]
+    
+
+    SOS_token = vocab.word_to_index(Vocab.SOS)
+    decoder_input = Variable(torch.LongTensor([[SOS_token]]))
+    decoder_hidden = encoder_hidden 
+
+    for i in range(abstract_input.size()[0]):
+        decoder_ouput, decoder_hidden = decoder(decoder_input, decoder_hidden)
+        decoder_input = abstract_input[i]
