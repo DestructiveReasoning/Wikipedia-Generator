@@ -4,7 +4,7 @@ import torch
 from torch.autograd import Variable
 
 from vocab import Vocab, loadvocab, loadembeddings
-from encoder_decoder import EncoderRNN, DecoderRNN, variableFromSentence, make_pairs, trainIters
+from encoder_decoder import EncoderRNN, DecoderRNN, variableFromSentence, make_pairs, trainIters, evaluate
 
 
 DATADIR = 'data/processed'
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     encoder = EncoderRNN(vocab.size(), HIDDEN_SIZE, emb)
     decoder = DecoderRNN(HIDDEN_SIZE, vocab.size())
 
-    trainIters(encoder, decoder, 5, pairs, print_every=1, plot_every=1000, max_length=MAX_LENGTH)
+    trainIters(encoder, decoder, 10, pairs, print_every=1, plot_every=1000, max_length=MAX_LENGTH)
 #
 #    article_input = variableFromSentence(vocab, article)
 #    abstract_input = variableFromSentence(vocab, abstract)
