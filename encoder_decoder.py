@@ -211,3 +211,40 @@ def trainIters(encoder, decoder, n_iters, training_pairs, print_every=1000,
             plot_loss_total = 0
 
     showPlot(plot_losses)
+
+def evaluate(encoder, decoder, sequence, max_length=MAX_LENGTH, max_summary_length=100):
+    input_variable = variableFromSentence(vocab, sequence)
+    input_length = input_variable.size()[0]
+    encoder_hidden = encoder.initHidden()
+
+    encoder_outputs = Variable(torch.zeros(max_length, encoder.hidden_size))
+    if use_cuda:
+        encoder_outputs = encoder_outputs.cuda()
+
+    for i in range(input_length):
+        encoder_output, encoder_hidden = encoder(input_variable[i], encoder_hidden)
+        encoder_outputs[i] = encoder_outputs[i] + encoder_output[0][0]
+    
+    SOS_token = vocab.word_to_index(Vocab.SOS)
+    decoder_input = Variable(torch.LongTensor([[SOS_token]]))
+    if use_cuda:
+        decoder_input = decoder_input.cuda()
+
+    decoder_hidden = encoder_hidden
+
+    decoded_words = []
+
+    for i in range(max_summary_length):
+        decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden)
+        topv, topi = decoder_output.data.topk(1)
+        ni = topi[0][0]
+        if ni == vocab.word_to_index(Vocab.EOS):
+            decoded_words.append("<EOS>")
+            break
+        else:
+            decoded_words.append(vocab.index_to_word(ni))
+        
+        decoder_input = Variable(torch.LongTensor([[ni]]))
+        if use_cuda:
+            decoder_input = decoder_input.cuda()
+    return decoded_words

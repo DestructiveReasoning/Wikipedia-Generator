@@ -37,6 +37,11 @@ class Vocab:
     def words_to_indices(self, words):
         return [self.word_to_index(w) for w in words]
 
+    def index_to_word(self, index):
+        if index >= self.size() or index < 0:
+            return "<UNK>"
+        return [key for key,value in self.vocab.items() if value == index][0]
+
 
 def loadvocab(f, limit=None):
     """Returns a dictionary with the index of each word in the vocab.

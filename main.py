@@ -43,7 +43,7 @@ if __name__ == '__main__':
     encoder = EncoderRNN(vocab.size(), HIDDEN_SIZE, emb)
     decoder = DecoderRNN(HIDDEN_SIZE, vocab.size())
 
-    trainIters(encoder, decoder, 3, pairs, print_every=1, plot_every=1000, max_length=MAX_LENGTH)
+    trainIters(encoder, decoder, 5, pairs, print_every=1, plot_every=1000, max_length=MAX_LENGTH)
 #
 #    article_input = variableFromSentence(vocab, article)
 #    abstract_input = variableFromSentence(vocab, abstract)
