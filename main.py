@@ -1,10 +1,10 @@
 from os import path
 
 import torch
-from torch.autograd import Variable
 
-from vocab import Vocab, loadvocab, loadembeddings
-from encoder_decoder import EncoderRNN, DecoderRNN, variableFromSentence, make_pairs, trainIters, evaluate
+from vocab import loadvocab, loadembeddings
+from encoder_decoder import EncoderRNN, DecoderRNN, variableFromSentence, \
+        make_pairs, trainIters
 
 
 DATADIR = 'data/processed'
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     articles = []
     abstracts = []
     with open(TESTSET, 'r') as f:
-        for i in range(10):
+        for i in range(100):
             articles.append(f.readline())
             abstracts.append(f.readline())
 
@@ -39,27 +39,13 @@ if __name__ == '__main__':
     abs_inputs = list(map(lambda x: variableFromSentence(vocab, x), abstracts))
     pairs = make_pairs(art_inputs, abs_inputs)
 
-#     TODO: change dimesion of hidden layer
+    # TODO: change dimesion of hidden layer
     encoder = EncoderRNN(vocab.size(), HIDDEN_SIZE, emb)
     decoder = DecoderRNN(2*HIDDEN_SIZE, vocab.size())
+    if use_cuda:
+        encoder = encoder.cuda()
+        decoder = decoder.cuda()
 
     print("Starting to train...")
-    trainIters(encoder, decoder, 10, pairs, print_every=1, plot_every=1000, max_length=MAX_LENGTH)
-#
-#    article_input = variableFromSentence(vocab, article)
-#    abstract_input = variableFromSentence(vocab, abstract)
-#
-#    encoder_hidden = encoder.initHidden()
-#    encoder_outputs = Variable(torch.zeros(MAX_LENGTH, encoder.hidden_size))
-#    for i in range(article_input.size()[0]):
-#        encoder_output, encoder_hidden = encoder(article_input[i], encoder_hidden)
-#        encoder_outputs[i] = encoder_output[0][0]
-#    
-#
-#    SOS_token = vocab.word_to_index(Vocab.SOS)
-#    decoder_input = Variable(torch.LongTensor([[SOS_token]]))
-#    decoder_hidden = encoder_hidden 
-#
-#    for i in range(abstract_input.size()[0]):
-#        decoder_ouput, decoder_hidden = decoder(decoder_input, decoder_hidden)
-#        decoder_input = abstract_input[i]
+    trainIters(encoder, decoder, 100, pairs, vocab, print_every=1,
+               plot_every=1000, max_length=MAX_LENGTH)

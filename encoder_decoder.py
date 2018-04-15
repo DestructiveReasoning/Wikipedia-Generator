@@ -15,8 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from torch import optim
 
-from os import path
-from vocab import Vocab, loadvocab
+from vocab import Vocab
 
 
 MAX_LENGTH = 100
@@ -24,14 +23,10 @@ MAX_LENGTH = 100
 use_cuda = torch.cuda.is_available()
 teacher_forcing_ratio = 0.5
 
-DATADIR = 'data/processed'
-VOCABFNAME = path.join(DATADIR, 'vocab')
-VOCABSIZE = 150000
-with open(VOCABFNAME, 'r') as f:
-    vocab = loadvocab(f, VOCABSIZE)
 
 def make_pairs(articles, abstracts):
     return list(zip(articles, abstracts))
+
 
 def variableFromSentence(vocab, sentence):
     indices = vocab.words_to_indices(sentence)
@@ -59,9 +54,10 @@ class EncoderRNN(nn.Module):
         return output, hidden
 
     def initHidden(self):
-        result = (Variable(torch.zeros(2, 1, self.hidden_size)), Variable(torch.zeros(2, 1, self.hidden_size)))
+        result = (Variable(torch.zeros(2, 1, self.hidden_size)),
+                  Variable(torch.zeros(2, 1, self.hidden_size)))
         if use_cuda:
-            return result.cuda()
+            return (result[0].cuda(), result[1].cuda())
         else:
             return result
 
@@ -84,16 +80,16 @@ class DecoderRNN(nn.Module):
         return output, hidden
 
     def initHidden(self):
-#        result = (Variable(torch.zeros(1, 1, self.hidden_size)),Variable(torch.zeros(1, 1, self.hidden_size)))
-        result = Variable(torch.zeros(1, 1, self.hidden_size))
+        result = (Variable(torch.zeros(1, 1, self.hidden_size)),
+                  Variable(torch.zeros(1, 1, self.hidden_size)))
         if use_cuda:
-            return result.cuda()
+            return (result[0].cuda(), result[1].cuda())
         else:
             return result
 
 
 def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
-          decoder_optimizer, criterion, max_length=MAX_LENGTH):
+          decoder_optimizer, criterion, vocab, max_length=MAX_LENGTH):
     encoder_hidden = encoder.initHidden()
 
     encoder_optimizer.zero_grad()
@@ -112,12 +108,12 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
             input_variable[ei], encoder_hidden)
         encoder_outputs[ei] = encoder_output[0][0]
 
-    # TODO: add starting token
     SOS_token = vocab.word_to_index(Vocab.SOS)
     decoder_input = Variable(torch.LongTensor([[SOS_token]]))
     decoder_input = decoder_input.cuda() if use_cuda else decoder_input
 
-    decoder_hidden = torch.cat([encoder_hidden[0], encoder_hidden[1]], dim=2).view(1,1,200)
+    decoder_hidden = (encoder_hidden[0].view(1, 1, -1),
+                      encoder_hidden[1].view(1, 1, -1))
 
     use_teacher_forcing = False
     if random.random() < teacher_forcing_ratio:
@@ -143,7 +139,7 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
             decoder_input = decoder_input.cuda() if use_cuda else decoder_input
 
             loss += criterion(decoder_output, target_variable[di])
-            if ni == Vocab.UNK:  # TODO: add end token
+            if ni == Vocab.EOS:
                 break
 
     loss.backward()
@@ -177,9 +173,9 @@ def showPlot(points):
     plt.plot(points)
 
 
-# TODO: build training pairs
-def trainIters(encoder, decoder, n_iters, training_pairs, print_every=1000,
-               plot_every=100, learning_rate=0.01, max_length=MAX_LENGTH):
+def trainIters(encoder, decoder, n_iters, training_pairs, vocab,
+               print_every=1000, plot_every=100, learning_rate=0.01,
+               max_length=MAX_LENGTH):
     start = time.time()
     plot_losses = []
     print_loss_total = 0  # Reset every print_every
@@ -196,7 +192,8 @@ def trainIters(encoder, decoder, n_iters, training_pairs, print_every=1000,
         target_variable = training_pair[1]
 
         loss = train(input_variable, target_variable, encoder,
-                     decoder, encoder_optimizer, decoder_optimizer, criterion, max_length=max_length)
+                     decoder, encoder_optimizer, decoder_optimizer, criterion,
+                     vocab, max_length=max_length)
         print_loss_total += loss
         plot_loss_total += loss
 
@@ -213,7 +210,9 @@ def trainIters(encoder, decoder, n_iters, training_pairs, print_every=1000,
 
     showPlot(plot_losses)
 
-def evaluate(encoder, decoder, sequence, max_length=MAX_LENGTH, max_summary_length=100):
+
+def evaluate(encoder, decoder, sequence, vocab, max_length=MAX_LENGTH,
+             max_summary_length=100):
     input_variable = variableFromSentence(vocab, sequence)
     input_length = input_variable.size()[0]
     encoder_hidden = encoder.initHidden()
@@ -223,9 +222,10 @@ def evaluate(encoder, decoder, sequence, max_length=MAX_LENGTH, max_summary_leng
         encoder_outputs = encoder_outputs.cuda()
 
     for i in range(input_length):
-        encoder_output, encoder_hidden = encoder(input_variable[i], encoder_hidden)
+        encoder_output, encoder_hidden = encoder(input_variable[i],
+                                                 encoder_hidden)
         encoder_outputs[i] = encoder_outputs[i] + encoder_output[0][0]
-    
+
     SOS_token = vocab.word_to_index(Vocab.SOS)
     decoder_input = Variable(torch.LongTensor([[SOS_token]]))
     if use_cuda:
@@ -244,7 +244,7 @@ def evaluate(encoder, decoder, sequence, max_length=MAX_LENGTH, max_summary_leng
             break
         else:
             decoded_words.append(vocab.index_to_word(ni))
-        
+
         decoder_input = Variable(torch.LongTensor([[ni]]))
         if use_cuda:
             decoder_input = decoder_input.cuda()
