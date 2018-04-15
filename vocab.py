@@ -35,12 +35,12 @@ class Vocab:
         return len(self.vocab)
 
     def words_to_indices(self, words):
-        return [self.word_to_index(w) for w in words]
+        return [self.word_to_index(w) for w in words.split(' ')]
 
     def index_to_word(self, index):
         if index >= self.size() or index < 0:
             return "<UNK>"
-        return [key for key,value in self.vocab.items() if value == index][0]
+        return [key for key, value in self.vocab.items() if value == index][0]
 
 
 def loadvocab(f, limit=None):

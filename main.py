@@ -4,19 +4,19 @@ import torch
 
 from vocab import loadvocab, loadembeddings
 from encoder_decoder import EncoderRNN, DecoderRNN, variableFromSentence, \
-        make_pairs, trainIters
+        make_pairs, trainIters, evaluate
 
 
 DATADIR = 'data/processed'
 TESTSET = path.join(DATADIR, 'test.bin')
 
 VOCABFNAME = path.join(DATADIR, 'vocab')
-VOCABSIZE = 150000
+VOCABSIZE = 50000
 
 GLOVEFNAME = 'resources/glove/glove.6B.50d.txt'
 
 HIDDEN_SIZE = 50
-MAX_LENGTH = 10000
+N_ITERS = 1000
 
 use_cuda = torch.cuda.is_available()
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     articles = []
     abstracts = []
     with open(TESTSET, 'r') as f:
-        for i in range(100):
+        for i in range(N_ITERS):
             articles.append(f.readline())
             abstracts.append(f.readline())
 
@@ -47,5 +47,9 @@ if __name__ == '__main__':
         decoder = decoder.cuda()
 
     print("Starting to train...")
-    trainIters(encoder, decoder, 100, pairs, vocab, print_every=1,
-               plot_every=1000, max_length=MAX_LENGTH)
+    trainIters(encoder, decoder, N_ITERS, pairs, vocab, print_every=10,
+               plot_every=1000)
+    print("Done training.")
+
+    decoded_words = evaluate(encoder, decoder, articles[0], vocab)
+    print(decoded_words)
