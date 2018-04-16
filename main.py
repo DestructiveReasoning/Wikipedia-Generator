@@ -8,15 +8,17 @@ from encoder_decoder import EncoderRNN, DecoderRNN, variableFromSentence, \
 
 
 DATADIR = 'data/processed'
+TRAINSET = path.join(DATADIR, 'train.bin')
 TESTSET = path.join(DATADIR, 'test.bin')
 
 VOCABFNAME = path.join(DATADIR, 'vocab')
-VOCABSIZE = 50000
+VOCABSIZE = 100000
 
 GLOVEFNAME = 'resources/glove/glove.6B.50d.txt'
 
 HIDDEN_SIZE = 50
-N_ITERS = 1000
+N_ITERS = 75000
+EPOCHS = 5
 
 use_cuda = torch.cuda.is_available()
 
@@ -30,7 +32,7 @@ if __name__ == '__main__':
 
     articles = []
     abstracts = []
-    with open(TESTSET, 'r') as f:
+    with open(TRAINSET, 'r') as f:
         for i in range(N_ITERS):
             articles.append(f.readline())
             abstracts.append(f.readline())
@@ -47,8 +49,10 @@ if __name__ == '__main__':
         decoder = decoder.cuda()
 
     print("Starting to train...")
-    trainIters(encoder, decoder, N_ITERS, pairs, vocab, print_every=10,
-               plot_every=1000)
+    for i in range(EPOCHS):
+        print("epoch %d / %d" % (i, EPOCHS))
+        trainIters(encoder, decoder, N_ITERS, pairs, vocab, print_every=100,
+                   plot_every=1000)
     print("Done training.")
 
     decoded_words = evaluate(encoder, decoder, articles[0], vocab)

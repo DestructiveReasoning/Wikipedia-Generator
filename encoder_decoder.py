@@ -20,7 +20,7 @@ from vocab import Vocab
 MAX_LENGTH = 100
 
 use_cuda = torch.cuda.is_available()
-teacher_forcing_ratio = 0.5
+teacher_forcing_ratio = 1.00  # TODO: Change such that teacher force sometime
 
 
 def make_pairs(articles, abstracts):
@@ -47,7 +47,7 @@ class EncoderRNN(nn.Module):
         self.lstm = nn.LSTM(hidden_size, hidden_size, bidirectional=True)
 
     def forward(self, input, hidden):
-        embedded = self.embedding(input).view(1, 1, -1)
+        embedded = self.embedding(input).view(input.size()[0], 1, -1)
         output = embedded
         output, hidden = self.lstm(output, hidden)
         return output, hidden
@@ -77,14 +77,6 @@ class DecoderRNN(nn.Module):
         output = self.softmax(self.out(output[0]))
         return output, hidden
 
-    def initHidden(self):
-        result = (Variable(torch.zeros(1, 1, self.hidden_size)),
-                  Variable(torch.zeros(1, 1, self.hidden_size)))
-        if use_cuda:
-            return (result[0].cuda(), result[1].cuda())
-        else:
-            return result
-
 
 def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
           decoder_optimizer, criterion, vocab):
@@ -93,13 +85,11 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
 
-    input_length = input_variable.size()[0]
     target_length = target_variable.size()[0]
 
     loss = 0
 
-    for ei in range(input_length):
-        _, encoder_hidden = encoder(input_variable[ei], encoder_hidden)
+    _, encoder_hidden = encoder(input_variable, encoder_hidden)
 
     SOS_token = vocab.word_to_index(Vocab.SOS)
     decoder_input = Variable(torch.LongTensor([[SOS_token]]))
@@ -108,7 +98,7 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer,
     decoder_hidden = (encoder_hidden[0].view(1, 1, -1),
                       encoder_hidden[1].view(1, 1, -1))
 
-    use_teacher_forcing = True
+    use_teacher_forcing = False
     if random.random() < teacher_forcing_ratio:
         use_teacher_forcing = True
 
@@ -169,9 +159,9 @@ def showPlot(points):
 def trainIters(encoder, decoder, n_iters, training_pairs, vocab,
                print_every=1000, plot_every=100, learning_rate=0.01):
     start = time.time()
-    plot_losses = []
+    # plot_losses = []
     print_loss_total = 0  # Reset every print_every
-    plot_loss_total = 0  # Reset every plot_every
+    # plot_loss_total = 0  # Reset every plot_every
 
     encoder_optimizer = optim.Adam(encoder.parameters())
     decoder_optimizer = optim.Adam(decoder.parameters())
@@ -187,21 +177,26 @@ def trainIters(encoder, decoder, n_iters, training_pairs, vocab,
                      decoder, encoder_optimizer, decoder_optimizer, criterion,
                      vocab)
         print_loss_total += loss
-        plot_loss_total += loss
+        # plot_loss_total += loss
 
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
             print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                   iter, iter / n_iters * 100, print_loss_avg))
-            print(_evaluate(encoder, decoder, input_variable[1], vocab, 100))
+            i = random.randrange(len(input_variable))
+            decoded = _evaluate(encoder, decoder, input_variable[i], vocab,
+                                100)
+            print(' '.join(decoded))
 
+        ''''
         if iter % plot_every == 0:
             plot_loss_avg = plot_loss_total / plot_every
             plot_losses.append(plot_loss_avg)
             plot_loss_total = 0
 
     showPlot(plot_losses)
+    '''
 
 
 def evaluate(encoder, decoder, sequence, vocab, max_summary_length=100):
