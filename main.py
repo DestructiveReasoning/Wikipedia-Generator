@@ -37,6 +37,7 @@ if __name__ == '__main__':
             articles.append(f.readline())
             abstracts.append(f.readline())
 
+    # TODO: add batching so we don't have load this whole thing into memory
     art_inputs = list(map(lambda x: variableFromSentence(vocab, x), articles))
     abs_inputs = list(map(lambda x: variableFromSentence(vocab, x), abstracts))
     pairs = make_pairs(art_inputs, abs_inputs)

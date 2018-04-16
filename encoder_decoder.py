@@ -159,9 +159,9 @@ def showPlot(points):
 def trainIters(encoder, decoder, n_iters, training_pairs, vocab,
                print_every=1000, plot_every=100, learning_rate=0.01):
     start = time.time()
-    # plot_losses = []
+    plot_losses = []
     print_loss_total = 0  # Reset every print_every
-    # plot_loss_total = 0  # Reset every plot_every
+    plot_loss_total = 0  # Reset every plot_every
 
     encoder_optimizer = optim.Adam(encoder.parameters())
     decoder_optimizer = optim.Adam(decoder.parameters())
@@ -177,7 +177,7 @@ def trainIters(encoder, decoder, n_iters, training_pairs, vocab,
                      decoder, encoder_optimizer, decoder_optimizer, criterion,
                      vocab)
         print_loss_total += loss
-        # plot_loss_total += loss
+        plot_loss_total += loss
 
         if iter % print_every == 0:
             print_loss_avg = print_loss_total / print_every
@@ -189,14 +189,12 @@ def trainIters(encoder, decoder, n_iters, training_pairs, vocab,
                                 100)
             print(' '.join(decoded))
 
-        ''''
         if iter % plot_every == 0:
             plot_loss_avg = plot_loss_total / plot_every
             plot_losses.append(plot_loss_avg)
             plot_loss_total = 0
 
     showPlot(plot_losses)
-    '''
 
 
 def evaluate(encoder, decoder, sequence, vocab, max_summary_length=100):
