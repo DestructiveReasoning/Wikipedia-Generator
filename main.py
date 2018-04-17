@@ -35,7 +35,7 @@ if __name__ == '__main__':
     with open(TRAINSET, 'r') as f:
         for i in range(N_ITERS):
             articles.append(f.readline())
-            abstracts.append(f.readline())
+            abstracts.append(f.readline() + ' ' + vocab.EOS)
 
     # TODO: add batching so we don't have load this whole thing into memory
     art_inputs = list(map(lambda x: variableFromSentence(vocab, x), articles))
