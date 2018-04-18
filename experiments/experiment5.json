@@ -1,0 +1,7 @@
+{
+    "vocab_size": 100000,
+    "teacher_forcing": 0.90,
+    "optimizer": {
+        "type": "RMSprop"
+    }
+}

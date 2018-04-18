@@ -66,7 +66,7 @@ if __name__ == '__main__':
                                     decoder.parameters())
 
     # Loss function
-    crit = nn.CrossEntropyLoss()
+    crit = nn.NLLLoss()
 
     trainer = Trainer(encoder, decoder, encoder_optim, decoder_optim, crit,
                       experiment['teacher_forcing'], vocab)
