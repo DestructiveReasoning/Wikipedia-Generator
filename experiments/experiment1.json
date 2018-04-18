@@ -1,0 +1,7 @@
+{
+    "vocab_size": 100000,
+    "teacher_forcing": 1.00,
+    "optimizer": {
+        "type": "Adam"
+    }
+}
