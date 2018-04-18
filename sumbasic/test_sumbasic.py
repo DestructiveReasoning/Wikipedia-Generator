@@ -10,14 +10,14 @@ valid_targets = []
 
 rouge = rouge.Rouge()
 
-with open("data/processed/test.bin", 'r') as f:
+with open("../data/processed/test.bin", 'r') as f:
     line = f.readline()
     while line:
         stories.append(line)
         targets.append(f.readline())
         line = f.readline()
 
-with open("data/processed/val.bin", 'r') as f:
+with open("../data/processed/val.bin", 'r') as f:
     line = f.readline()
     while line:
         valid_stories.append(line)
