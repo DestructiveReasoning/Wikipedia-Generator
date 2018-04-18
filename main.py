@@ -53,7 +53,6 @@ if __name__ == '__main__':
     with open(TRAINSET, 'r') as f:
         pairs = getArticleAbstractPairs(f, vocab)
 
-    # Initialize encoder and decoder
     encoder = EncoderRNN(vocab.size(), HIDDEN_SIZE, emb)
     decoder = DecoderRNN(2*HIDDEN_SIZE, vocab.size())
     if use_cuda:
