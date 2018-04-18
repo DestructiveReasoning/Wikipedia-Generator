@@ -21,10 +21,10 @@ The training error is logged to a `training_error.log` file inside the `/models`
 
 ## Loading model
 
-The model will be saved to the at the end of each epoch so you can evaluate the results later.
+The model will be saved at the end of each epoch so you can evaluate the results later.
 The params are saved inside the `/models` directory.
 
-You can use the `load_model.py` script to load the model after a specific epoch and the validation set.
+You can use the `load_model.py` script to load the validation set and the model after a specific epoch.
 For example, the following will load the model used in experiment1 after the 0th (first) epoch:
 
 ```sh
