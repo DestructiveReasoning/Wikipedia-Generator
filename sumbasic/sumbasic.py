@@ -50,12 +50,12 @@ def pick_sentence(sentences, probs, n=1, lam=1.0):
     distribution = exp_distribution(lam, range(len(sentences)))
     i = np.random.rand()
     x = 0
-    while distribution[x] > i:
-        i += 1
-        if i >= len(distribution):
-            i = 0
+    while distribution[x] < i:
+        x += 1
+        if x >= len(distribution):
+            x = 0 #In the unlucky event that i > all values in distribution, just revert to best sentence
             break
-    return sentences[i]
+    return sentences[x]
 
 def make_summary(story, target_length, n=1, lam=1.0):
     probs = get_token_probs(story, n=n)
