@@ -100,7 +100,7 @@ class Validater:
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: puth load_model.py experiment.json")
+        print("Usage: val_loss load_model.py experiment.json")
         sys.exit(-1)
 
     EXPERIMENT = sys.argv[1]
