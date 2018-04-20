@@ -1,6 +1,9 @@
 import numpy as np
 import re
 
+def exp_distribution(lam, x):
+    return lam * np.exp(x)
+
 def get_words(s):
     return re.sub("[^\w]", " ", s).split()
 
@@ -41,17 +44,29 @@ def score_sentence(sentence, probs, n=1):
     total_prob = sum(map(lambda x: probs[x] if x in probs else 0.0, tokens))
     return total_prob/total_tokens
 
-def make_summary(story, target_length, n=1):
+def pick_sentence(sentences, probs, n=1, lam=1.0):
+    sentence_scores = [score_sentence(s, probs, n=n) for s in sentences]
+    sentences = [x for _, x in sorted(zip(sentence_scores, sentences), reverse=True)]
+    distribution = exp_distribution(lam, range(len(sentences)))
+    i = np.random.rand()
+    x = 0
+    while distribution[x] < i:
+        x += 1
+        if x >= len(distribution):
+            x = 0 #In the unlucky event that i > all values in distribution, just revert to best sentence
+            break
+    return sentences[x]
+
+def make_summary(story, target_length, n=1, lam=1.0):
     probs = get_token_probs(story, n=n)
     sentences = get_sentences(story.lower())
     summary = ""
     summary_len = 0
     while summary_len < target_length:
-        sentence_scores = [score_sentence(s, probs, n=n) for s in sentences]
-        sentences = [x for _, x in sorted(zip(sentence_scores, sentences), reverse=True)]
-        summary += sentences[0] + ". "
-        new_words = get_words(sentences[0])
-        new_tokens = get_ngrams(sentences[0],n=n)
+        sentence = pick_sentence(sentences, probs, n=n, lam=lam)
+        summary += sentence + ". "
+        new_words = get_words(sentence)
+        new_tokens = get_ngrams(sentence,n=n)
         summary_len += len(new_words)
         for token in new_tokens:
             probs[token] *= probs[token]
