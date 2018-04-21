@@ -12,7 +12,7 @@ python test_leadn.py
 The results will be stored in a file called `scores_leadn.csv` in this directory, and will be overwritten at each run.
 
 ## Extended SumBasic
-Read our article at http://cs.mcgill.ca/~hwiltz/literature/ for more details about how this works. Essentially, SumBasic determines *relevant* sentences according to the frequency of the words in each sentence, and creates summaries with the most relevant sentences. <br>
+Read our article at cs.mcgill.ca/~hwiltz/literature for more details about how this works. Essentially, SumBasic determines *relevant* sentences according to the frequency of the words in each sentence, and creates summaries with the most relevant sentences. <br>
 As described in the article, the SumBasic model here is split into two slightly different models, the sentences over tokens model and the tokens over sentences model. The former is in `sumbasic.py`, and the latter is implemented in `sumbasic_tokensfirst.py`.<br>
 To experiment with these models, import **one of** `sumbasic` and `sumbasic_tokensfirst` to select between the two models. Then, edit the `summary_lengths`, `n_grams`, and `lambdas` lists with your choice of hyperparameter configurations. To run model selection and evaluate test set performance, run the following command:
 ```sh
