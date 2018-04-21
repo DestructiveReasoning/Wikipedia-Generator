@@ -30,3 +30,6 @@ For example, the following will load the model used in experiment1 after the 0th
 ```sh
 python -i load_model.py experiments/experiment1.json 0
 ```
+
+## Other Baselines
+To experiment and/or peruse the other baselines that were implemented, please check out the `base-baselines` directory.
