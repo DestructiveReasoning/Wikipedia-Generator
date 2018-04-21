@@ -6,11 +6,14 @@ import torch
 
 from main import DATADIR, MODELDIR, VOCABFNAME, HIDDEN_SIZE
 from encoder_decoder import EncoderRNN, DecoderRNN
-from train import getArticleAbstractPairs
+from evaluate import getEvalData
 from vocab import loadvocab
+from train import _evaluate
 
 
 VALSET = path.join(DATADIR, 'val.bin')
+
+use_cuda = torch.cuda.is_available()
 
 
 if __name__ == '__main__':
@@ -38,10 +41,13 @@ if __name__ == '__main__':
 
     print("Loading Validation Set...")
     with open(VALSET, 'r') as f:
-        pairs = getArticleAbstractPairs(f, vocab)
+        valdata = getEvalData(f, vocab)
 
     encoder = EncoderRNN(vocab.size(), HIDDEN_SIZE)
     decoder = DecoderRNN(2*HIDDEN_SIZE, vocab.size())
+    if use_cuda:
+        encoder = encoder.cuda()
+        decoder = decoder.cuda()
 
     exp_fname = path.split(EXPERIMENT)[-1].split('.')[0]
     model_path = path.join(MODELDIR, exp_fname)
