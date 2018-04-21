@@ -32,4 +32,4 @@ python -i load_model.py experiments/experiment1.json 0
 ```
 
 ## Other Baselines
-To experiment and/or peruse the other baselines that were implemented, please check out the `base-baselines` directory.
+To experiment and/or peruse the other baselines that were implemented, please check out the `baseline-baselines` directory.

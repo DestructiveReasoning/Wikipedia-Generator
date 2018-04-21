@@ -25,7 +25,9 @@ f = open("scores_leadn.csv", 'w')
 
 best_result = {'score': 0, 'n': 0}
 
-for n in [2, 3, 4, 5, 6, 7, 8, 9, 10]:
+n_values = [2,3,4,5,6,7,8,9,10]
+
+for n in n_values:
     i = 0
     summaries = []
     for story in stories:
