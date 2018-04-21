@@ -1,0 +1,80 @@
+\documentclass[10pt]{article}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{float}
+
+\title{COMP 551 - T1-05 Executive Summary}
+\author{Justin Bell\\260561261\and Stuart Mashaal\\260639962\and Harley Wiltzer\\260690006}
+\date{\today}
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\begin{multicols}{2}
+	The 2017 paper \textit{A Deep Reinforced Model for Abstractive Summarization} by Paulus, Xiong,
+	and Socher presents a novel attention
+method and Maximum-Likelihood/Reinforcement-Learning (RL) hybrid model for creating abstractive
+summarization of news articles. The authors also include some baselines in their analysis, some
+original and others borrowed from related works.
+
+To obtain better baselines. we implemented and tuned Lead-$N$, SumBasic, and LSTM-RNN without
+Attention on the CNN/Daily Mail dataset used in the paper. We used ROUGE-1, and ROUGE-2 F1 scores to
+compare the results.
+
+The simple Lead-$N$ model, which extracts the first $N$ sentences of an article, was significantly
+improved by finding the best value of $N$ via model selection with the validation set. With a value
+of $N$=4, this naive model outperformed even the best results from the state-of-the-art models
+presented in the reference paper with a ROUGE-1 F1 score of 41.4\%.
+
+We also implemented and tuned an extended SumBasic model via model selection with the validation
+set. This model also showed surprisingly good results with a ROUGE-1 F1 score of 39.7\%. Although
+this does not beat the score from the best Lead-$N$ classifier, it is still considerably greater
+than many of the reported baseline scores from \textit{A Deep Reinforced Model for Abstractive
+Summarization} Although this does not beat the score from the best Lead-$N$ classifier, it is still
+considerably greater than many of the reported baseline scores from \textit{A Deep Reinforced Model
+for Abstractive Summarization}.
+
+The last baseline we included was an implementation of the Maximum Likelihood (ML) LSTM-RNN
+encoder-decoder without attention. We tried 4 experiments, each with a different set of
+hyperparameters, all of which were much worse than even the baselines shown in the original paper. We
+suspect this is due to limited training time and compromises we made to make the training faster. We
+support this claim with reference to the training-validation error charts.
+
+The hyper-parameters that were considered for the encoder-decoder were vocabulary size and the
+teacher forcing ratio. We chose to compare a smaller vocabulary to check if we could get similar
+results with much shorter computational costs. We considered teacher forcing ratio in hopes that a
+higher ratio would correlate with faster convergence.
+
+The article ultimately culminates in the observation that the simplest models reported the greatest
+scores for a minute fraction of the computational power, and discuss the implications of this
+result. Various suggestions for the reason behind these results are pondered and rationalized. The
+results are summarized in \hyperref[tab:results]{Table \ref{tab:results}}.
+
+The full article is available for perusal at
+\url{http://cs.mcgill.ca/~hwiltz/literature/COMP551AbstractiveSummarization.pdf}.
+%\href{http://cs.mcgill.ca/~hwiltz/literature/COMP551AbstractiveSummarization.pdf}{here}.
+\end{multicols}
+\begin{table}[h]
+	\footnotesize
+    \begin{center}
+        \begin{tabular}{|c|c|c|}
+            \hline
+            Model & Rouge-1 (\%) & Rouge-2 (\%) \\\hline
+            Lead-3 (Nallapati et al, 2017) & 39.2 & 15.7\\\hline
+            \color{blue}Lead-3 & \color{blue}40.7 & \color{blue}16.1\\\hline
+            \color{blue}Lead-4 & \color{blue}41.4 & \color{blue}16.8\\\hline
+            words-lvt2k-temp-att (Nallapati et al., 2016) & 35.46 & 13.30\\\hline
+            \color{blue}Extended SumBasic (sentences over tokens) & \color{blue}36.3 & \color{blue}13.2\\\hline
+            \color{blue}Extended SumBasic (tokens over sentences) & \color{blue}39.7 & \color{blue}15.8\\\hline
+            ML without intra-attention (Paulus et al., 2017) & 37.86 & 14.69\\\hline
+			\color{blue}ML without intra-attention (LSTM Encoder-Decoder) & \color{blue} &
+			\color{blue} \\\hline
+        \end{tabular}
+        \caption{\footnotesize Results of various baseline models in comparison with the results reported in \textit{A Deep Reinforced Model for Abstractive Summarization} \color{blue}(results highlighted in blue were yielded with the models proposed in this paper)}
+        \label{tab:results}
+    \end{center}
+\end{table}
+\end{document}

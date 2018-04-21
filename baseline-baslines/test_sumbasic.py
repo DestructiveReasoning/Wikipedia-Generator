@@ -26,9 +26,9 @@ with open("../data/processed/val.bin", 'r') as f:
 
 N = len(stories)
 
-summary_lengths = [80, 90, 100]
-n_grams = [1,2,3]
-lambdas = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+summary_lengths = [80]
+n_grams = [4,5]
+lambdas = [1.0]
 
 sf = open("scores_sumbasic.csv", 'w')
 
