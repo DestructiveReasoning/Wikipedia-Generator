@@ -9,6 +9,7 @@ the values of $N$ you'd like to test. Then, running the following command will d
 ```sh
 python test_leadn.py
 ```
+The results will be stored in a file called `scores_leadn.csv` in this directory, and will be overwritten at each run.
 
 ## Extended SumBasic
 Read (our article)[http://cs.mcgill.ca/~hwiltz/literature/COMP551AbstractiveSummarization.pdf] for more details about how this works. Essentially, SumBasic determines *relevant* sentences according to the frequency of the words in each sentence, and creates summaries with the most relevant sentences. <br>
@@ -17,3 +18,4 @@ To experiment with these models, import **one of** `sumbasic` and `sumbasic_toke
 ```sh
 python test_sumbasic.py
 ```
+The results will be stored in a file called `scores_sumbasic.csv` in this directory, and will be overwritten at each run. Furthermore, the generated summaries will be stored in `summaries.txt` in this directory.
